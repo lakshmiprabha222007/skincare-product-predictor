@@ -1,3 +1,33 @@
+def add_bg_color():
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background: linear-gradient(
+                135deg,
+                #fceabb,
+                #f8b500,
+                #f6d365,
+                #fda085
+            );
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1, h2, h3 {
+            color: #2c2c2c;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 import streamlit as st
 import numpy as np
 import pandas as pd

@@ -12,7 +12,7 @@ st.set_page_config(page_title="AI Skincare Advisor", layout="wide")
 
 st.title("✨ AI Skincare Product Predictor")
 
-# 1. Load the Model
+# 1. Load the Model Architecture
 @st.cache_resource
 def load_skincare_model():
     model = Sequential([
@@ -23,58 +23,74 @@ def load_skincare_model():
         Dense(4, activation='softmax')
     ])
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    # Optional: model.load_weights('model.h5') if you have a weights file
+    
+    # If you have a trained weights file (e.g. skin_model.h5), uncomment the line below:
+    # if os.path.exists('skin_model.h5'): model.load_weights('skin_model.h5')
+    
     return model
 
-# 2. Robust File Loading
+# 2. Load the CSV Data
 @st.cache_data
 def load_product_data():
-    # List of possible names the file might have on GitHub
-    possible_names = [
-        "skincare_products.xlsx - Sheet1.csv",
-        "skincare_products.csv",
-        "products.csv"
-    ]
-    
-    for name in possible_names:
-        if os.path.exists(name):
-            return pd.read_csv(name)
-    
+    # Try the exact name of the file you uploaded
+    filename = "skincare_products.xlsx - Sheet1.csv"
+    if os.path.exists(filename):
+        return pd.read_csv(filename)
+    else:
+        # Fallback for common renames
+        if os.path.exists("products.csv"):
+            return pd.read_csv("products.csv")
     return None
 
 model = load_skincare_model()
 df = load_product_data()
 skin_types = ["Oily", "Dry", "Normal", "Sensitive"]
 
+# Check if data loaded
 if df is None:
-    st.error("⚠️ Error: Product database file not found in GitHub. Please check your filename.")
-    st.info("Ensure the CSV file is in the same folder as app.py and is named: `skincare_products.xlsx - Sheet1.csv`")
+    st.error("Database file not found! Ensure 'skincare_products.xlsx - Sheet1.csv' is in your GitHub folder.")
     st.stop()
 
-# 3. Sidebar and Webcam Input
-st.sidebar.header("Input Source")
-option = st.sidebar.radio("Method:", ("Live Webcam", "Upload File"))
+# 3. Sidebar/Webcam UI
+st.sidebar.header("Settings")
+option = st.sidebar.radio("Input Source:", ("Live Webcam", "Upload Image"))
 
-img_file = st.camera_input("Take a photo") if option == "Live Webcam" else st.sidebar.file_uploader("Upload Image", type=["jpg", "png"])
+if option == "Live Webcam":
+    img_file = st.camera_input("Snap a photo of your skin")
+else:
+    img_file = st.sidebar.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
 
+# 4. Prediction Logic
 if img_file:
     col1, col2 = st.columns(2)
+    
+    # Process Image
     image = Image.open(img_file)
     with col1:
-        st.image(image, caption='Captured Skin Profile', use_container_width=True)
+        st.image(image, caption='Input Photo', use_container_width=True)
     
-    # Predict
+    # Preprocessing
     img_array = np.array(image.convert('RGB'))
     img_array = cv2.resize(img_array, (64, 64)) / 255.0
-    prediction = model.predict(img_array.reshape(1, 64, 64, 3))
-    detected_skin = skin_types[np.argmax(prediction)]
+    img_array = img_array.reshape(1, 64, 64, 3)
+    
+    # Predict
+    prediction = model.predict(img_array)
+    skin_index = np.argmax(prediction)
+    detected_skin = skin_types[skin_index]
     
     with col2:
-        st.subheader(f"Analysis: :blue[{detected_skin} Skin]")
-        st.write(f"Confidence: {np.max(prediction):.2%}")
-        
+        st.subheader(f"Result: :blue[{detected_skin} Skin]")
+        st.write(f"Match Confidence: {np.max(prediction):.2%}")
         st.divider()
-        st.subheader("Recommended for You:")
-        # Filter logic
+        
+        # 5. Fixed Recommendation Logic
+        st.subheader("Recommended Products")
+        
+        # Filter for the detected skin type
         recs = df[df["Skin Type"].str.contains(detected_skin, case=False, na=False)]
-        st.table(recs[["Product Name", "Brand", "Price (₹)", "Reviews ⭐"]].head(5))warning("No products found in the database for this skin type.")
+        
+        if not recs.empty:
+            st.table(recs[["Product Name", "Brand", "Price (₹)", "Reviews ⭐"]].head(5))
+        else:
+            st.warning("No specific products found for this skin type in the database.")

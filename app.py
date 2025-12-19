@@ -1,12 +1,12 @@
 import streamlit as st
-import cv2
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 st.set_page_config(page_title="Skin Care Product Recommender")
 
 st.title("🧴 Skin Care Product Recommendation App")
-st.write("Use your webcam to detect skin type and get product suggestions")
+st.write("Capture your face using webcam to detect skin type")
 
 # Load dataset
 @st.cache_data
@@ -15,12 +15,13 @@ def load_data():
 
 df = load_data()
 
-# Webcam capture
-img_file = st.camera_input("📷 Capture your face")
+# Webcam input
+img_file = st.camera_input("📷 Capture Image")
 
 def detect_skin_type(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    brightness = np.mean(gray)
+    gray = image.convert("L")  # Convert to grayscale
+    pixels = np.array(gray)
+    brightness = pixels.mean()
 
     if brightness > 170:
         return "Dry"
@@ -30,15 +31,15 @@ def detect_skin_type(image):
         return "Normal"
 
 if img_file is not None:
-    file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, 1)
+    image = Image.open(img_file)
 
-    skin_type = detect_skin_type(img)
+    skin_type = detect_skin_type(image)
 
-    st.subheader("🧪 Detected Skin Type:")
+    st.subheader("🧪 Detected Skin Type")
     st.success(skin_type)
 
-    st.subheader("🛍️ Recommended Products:")
+    st.subheader("🛍 Recommended Products")
     products = df[df["Skin_Type"] == skin_type]
 
     st.table(products[["Product_Name", "Brand", "Price"]])
+

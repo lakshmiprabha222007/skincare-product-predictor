@@ -17,7 +17,7 @@ st.write("📷 Capture your Image")
 img_data = st.camera_input("Take a photo")
 
 # ------------- LOAD MODEL FROM GITHUB -------------
-url = "https://raw.githubusercontent.com/USERNAME/REPO_NAME/main/cnn_model.h5"
+url =" https://github.com/lakshmiprabha222007/skincare-product-predictor/blob/main/cnn_model%20(2).h5"
 
 @st.cache_resource
 def load_model():

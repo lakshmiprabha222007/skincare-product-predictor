@@ -1,77 +1,71 @@
-import streamlit as st
-import tensorflow as tf
+import os
+import cv2
 import numpy as np
-import requests
-import io
-from PIL import Image
+import pandas as pd
+import tensorflow as tf
+from flask import Flask, request, jsonify
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 
-st.set_page_config(page_title="Skin Product Recommendation App", layout="wide")
+app = Flask(__name__)
 
-st.title("🌟 AI Based Skin Product Recommendation")
-st.write("Upload / Capture your face and get the best recommendation")
+# 1. Recreate Model Architecture (matching the notebook)
+def load_skincare_model():
+    model = Sequential([
+        Conv2D(16, (3,3), activation='relu', input_shape=(64,64,3)),
+        MaxPooling2D(2,2),
+        Flatten(),
+        Dense(32, activation='relu'),
+        Dense(4, activation='softmax')
+    ])
+    
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    
+    # Note: You need to have 'skin_products.pkl' or weights saved 
+    # from your training session to load them here.
+    # If you saved the whole model: model = tf.keras.models.load_model('model.h5')
+    return model
 
-# ---------------- USER INPUT ----------------
-name = st.text_input("Enter Your Name")
+model = load_skincare_model()
 
-st.write("📷 Capture your Image")
-img_data = st.camera_input("Take a photo")
+# 2. Preprocessing function
+def prepare_image(image_path):
+    img = cv2.imread(image_path)
+    img = cv2.resize(img, (64, 64))
+    img = img / 255.0
+    img = img.reshape(1, 64, 64, 3)
+    return img
 
-# ------------- LOAD MODEL FROM GITHUB -------------
-url =" https://github.com/lakshmiprabha222007/skincare-product-predictor/blob/main/cnn_model%20(2).h5"
-
-@st.cache_resource
-def load_model():
+@app.route('/predict', methods=['POST'])
+def predict():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    file_path = "temp_image.jpg"
+    file.save(file_path)
+    
     try:
-        response = requests.get(url)
-        model = tf.keras.models.load_model(io.BytesIO(response.content))
-        return model
+        # Process image
+        processed_img = prepare_image(file_path)
+        
+        # Predict
+        prediction = model.predict(processed_img)
+        class_idx = np.argmax(prediction)
+        
+        # Cleanup
+        os.remove(file_path)
+        
+        return jsonify({
+            'class_index': int(class_idx),
+            'confidence': float(np.max(prediction))
+        })
     except Exception as e:
-        st.error("❌ Failed to Load Model from GitHub")
-        st.write(e)
-        return None
+        return jsonify({'error': str(e)}), 500
 
-model = load_model()
-
-# ---------- PRODUCT & REVIEWS (Example) ----------
-products = {
-    "Oily Skin": {
-        "product": "Mamaearth Oil Control Face Wash",
-        "review": "4.5⭐ — Best for oil control and acne prevention.",
-        "reason": "Your skin looks oily with visible shine. Oil-control products help."
-    },
-    "Dry Skin": {
-        "product": "Cetaphil Gentle Cleanser",
-        "review": "4.6⭐ — Excellent hydration and smooth skin result.",
-        "reason": "Your skin appears dry & flaky. Hydrating cleanser helps moisture."
-    },
-    "Normal Skin": {
-        "product": "Simple Refreshing Face Wash",
-        "review": "4.4⭐ — Suitable for daily freshness and glow.",
-        "reason": "Your skin looks balanced without excess oil or dryness."
-    },
-    "Acne Skin": {
-        "product": "Himalaya Neem Face Wash",
-        "review": "4.3⭐ — Trusted acne & pimple solution.",
-        "reason": "Spots / acne detected. Neem face wash reduces bacteria."
-    }
-}
-
-# ---------- PREDICTION ----------
-if img_data is not None and model is not None:
-    image = Image.open(img_data)
-    image = image.resize((224, 224))
-    img_array = np.array(image) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
-
-    prediction = model.predict(img_array)
-    result = np.argmax(prediction)
-
-    classes = ["Oily Skin", "Dry Skin", "Normal Skin", "Acne Skin"]
-    skin_type = classes[result]
-
-    st.success(f"👤 Hello {name}, Your detected Skin Type is: **{skin_type}**")
-
-    st.subheader("🎯 Recommended Product")
-    st.write("🛍️ Product:", products[skin_type]["product"])
-    st.write("⭐ Reviews:", products[skin_type]["review"])
-    st.write("ℹ️ Why Suggested:", products[skin_type]["reason"])
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

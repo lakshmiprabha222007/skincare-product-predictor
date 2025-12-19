@@ -33,7 +33,7 @@ def load_skincare_model():
 @st.cache_data
 def load_product_data():
     # Try the exact name of the file you uploaded
-    filename = "skincare_products.xlsx - Sheet1.csv"
+    filename = "https://github.com/lakshmiprabha222007/skincare-product-predictor/blob/main/skin_products.xlsx"
     if os.path.exists(filename):
         return pd.read_csv(filename)
     else:

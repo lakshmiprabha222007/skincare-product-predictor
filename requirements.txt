@@ -1,5 +1,6 @@
-streamlit
+flask
 tensorflow
+opencv-python-headless
 numpy
-requests
-Pillow
+pandas
+openpyxl

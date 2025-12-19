@@ -46,30 +46,3 @@ if img_file:
         st.table(products)
     else:
         st.error("❌ Column 'Skin_Type' not found in Excel file")
-st.markdown(
-    """
-    <style>
-    .website-link {
-        font-size: 18px;
-        text-align: center;
-        margin-top: 15px;
-    }
-    .website-link a {
-        color: #ffffff;
-        background-color: #0078ff;
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: bold;
-    }
-    .website-link a:hover {
-        background-color: #005fcc;
-    }
-    </style>
-
-    <div class="website-link">
-        <a href="https://yourwebsite.com" target="_blank">🌐 Visit Our Website</a>
-    </div>
-    """,
-    unsafe_allow_html=True
-)

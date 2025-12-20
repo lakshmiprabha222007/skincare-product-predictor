@@ -1,58 +1,48 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
 from PIL import Image
 
-# ======================
-# App Configuration
-# ======================
-st.set_page_config(
-    page_title="Skin Care Product Recommender",
-    layout="centered"
-)
+st.set_page_config(page_title="Skin Care Product Recommender")
 
 st.title("🧴 Skin Care Product Recommendation App")
-st.write("Capture your face using webcam to analyze skin type")
 
-# ======================
-# Load Excel Dataset
-# ======================
+# Load dataset
 @st.cache_data
 def load_data():
     df = pd.read_excel("skin_products.xlsx")
-
-    # Clean column names
     df.columns = df.columns.str.strip().str.replace(" ", "_")
-
-    # Clean Skin_Type values
-    df["Skin_Type"] = df["Skin_Type"].astype(str).str.strip().str.capitalize()
-
     return df
 
 df = load_data()
 
-# ======================
-# Webcam Input
-# ======================
-st.subheader("📷 Capture Image")
-image_file = st.camera_input("Take a photo")
+st.write("📄 Dataset Columns:", df.columns.tolist())
 
-# ======================
-# Improved Skin Detection
-# ======================
+# Webcam input
+img_file = st.camera_input("📷 Capture Image")
+
 def detect_skin_type(image):
     gray = image.convert("L")
-    img_array = np.array(gray)
+    brightness = np.array(gray).mean()
 
-    brightness = img_array.mean()
-    contrast = img_array.std()
-
-    # Improved logic (not always Normal)
-    if brightness < 115 and contrast > 40:
-        return "Oily"
-    elif brightness > 160 and contrast < 35:
+    if brightness > 170:
         return "Dry"
+    elif brightness < 100:
+        return "Oily"
     else:
         return "Normal"
 
-# =====================
+if img_file:
+    image = Image.open(img_file)
+    skin_type = detect_skin_type(image)
+
+    st.subheader("🧪 Detected Skin Type")
+    st.success(skin_type)
+
+    # Filter products safely
+    if "Skin_Type" in df.columns:
+        products = df[df["Skin_Type"].str.lower() == skin_type.lower()]
+        st.subheader("🛍 Recommended Products")
+        st.table(products)
+    else:
+        st.error("❌ Column 'Skin_Type' not found in Excel file")

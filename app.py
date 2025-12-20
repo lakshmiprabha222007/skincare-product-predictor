@@ -8,14 +8,25 @@ st.set_page_config(page_title="Skin Care Product Recommender")
 st.title("🧴 Skin Care Product Recommendation App")
 st.write("Capture your face using webcam to detect skin type")
 
-# Load dataset
+# Load dataset safely
 @st.cache_data
 def load_data():
     df = pd.read_excel("skin_products.xlsx")
-    df.columns = df.columns.str.strip()  # safety
+
+    # Normalize column names
+    df.columns = (
+        df.columns
+        .str.strip()
+        .str.lower()
+        .str.replace(" ", "_")
+    )
+
     return df
 
 df = load_data()
+
+# Show columns (for debugging/demo)
+st.write("📄 Dataset Columns:", df.columns.tolist())
 
 # Webcam input
 img_file = st.camera_input("📷 Capture Image")
@@ -25,16 +36,14 @@ def detect_skin_type(image):
     pixels = np.array(gray)
 
     brightness = pixels.mean()
-
-    # Show value for demo/viva
-    st.write("📊 Brightness value:", round(brightness, 2))
+    st.write("📊 Brightness:", round(brightness, 2))
 
     if brightness > 150:
-        return "Dry"
+        return "dry"
     elif brightness < 120:
-        return "Oily"
+        return "oily"
     else:
-        return "Normal"
+        return "normal"
 
 if img_file is not None:
     image = Image.open(img_file)
@@ -43,22 +52,30 @@ if img_file is not None:
     auto_skin_type = detect_skin_type(image)
 
     st.subheader("🧪 Auto Detected Skin Type")
-    st.success(auto_skin_type)
+    st.success(auto_skin_type.capitalize())
 
-    # Manual confirmation (IMPORTANT FIX)
-    st.info("If detection is not accurate, please confirm manually:")
-
+    # Manual confirmation
     skin_type = st.radio(
         "Confirm your skin type",
-        ["Dry", "Oily", "Normal"],
-        index=["Dry", "Oily", "Normal"].index(auto_skin_type)
+        ["dry", "oily", "normal"],
+        index=["dry", "oily", "normal"].index(auto_skin_type)
     )
 
     st.subheader("🛍 Recommended Products")
 
-    products = df[df["Skin_Type"].str.lower() == skin_type.lower()]
+    # Find correct skin type column automatically
+    skin_col = None
+    for col in df.columns:
+        if "skin" in col and "type" in col:
+            skin_col = col
+            break
 
-    if not products.empty:
-        st.table(products[["Product_Name", "Brand", "Price"]])
+    if skin_col is None:
+        st.error("❌ Skin type column not found in dataset")
     else:
-        st.warning("No products found for this skin type.")
+        products = df[df[skin_col].str.lower() == skin_type]
+
+        if not products.empty:
+            st.table(products)
+        else:
+            st.warning("No products found for this skin type.")

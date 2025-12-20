@@ -30,7 +30,7 @@ def brightness_to_skin_type(brightness):
     else:
         return "oily"
 
-# Initialize session_state
+# --- Initialize session state ---
 if "step" not in st.session_state:
     st.session_state.step = 1
 if "brightness_skin_type" not in st.session_state:
@@ -53,7 +53,6 @@ if st.session_state.step == 1:
 
     if st.button("Next: Skin Quiz"):
         st.session_state.step = 2
-        st.experimental_rerun()
 
 # --- Step 2: Skin Quiz ---
 elif st.session_state.step == 2:
@@ -68,7 +67,7 @@ elif st.session_state.step == 2:
     q7 = st.radio("How prone is your skin to acne or breakouts?", ["Rarely", "Sometimes", "Often"])
     q8 = st.radio("How visible are fine lines or wrinkles?", ["Very visible", "Slightly visible", "Not visible"])
 
-    # Calculate score
+    # Calculate quiz score
     score = 0
     answers = [q1,q2,q3,q4,q5,q6,q7,q8]
     for ans in answers:
@@ -79,7 +78,7 @@ elif st.session_state.step == 2:
         else:
             score += 3
 
-    # Map total score to skin type
+    # Map score to skin type
     if score <= 10:
         st.session_state.quiz_skin_type = "dry"
     elif score <= 16:
@@ -91,7 +90,6 @@ elif st.session_state.step == 2:
 
     if st.button("Next: Recommended Products"):
         st.session_state.step = 3
-        st.experimental_rerun()
 
 # --- Step 3: Product Recommendation ---
 elif st.session_state.step == 3:
@@ -119,8 +117,8 @@ elif st.session_state.step == 3:
         else:
             st.warning("No products found for this skin type.")
 
+    # Restart button
     if st.button("Restart"):
         st.session_state.step = 1
         st.session_state.brightness_skin_type = None
         st.session_state.quiz_skin_type = None
-        st.experimental_rerun()

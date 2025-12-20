@@ -3,10 +3,16 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 
-st.set_page_config(page_title="Skin Care Product Recommender", layout="centered")
+# ======================
+# App Configuration
+# ======================
+st.set_page_config(
+    page_title="Skin Care Product Recommender",
+    layout="centered"
+)
 
 st.title("🧴 Skin Care Product Recommendation App")
-st.write("Use webcam to analyze skin type and get product recommendations")
+st.write("Capture your face using webcam to analyze skin type")
 
 # ======================
 # Load Excel Dataset
@@ -32,45 +38,21 @@ st.subheader("📷 Capture Image")
 image_file = st.camera_input("Take a photo")
 
 # ======================
-# Skin Type Detection
+# Improved Skin Detection
 # ======================
 def detect_skin_type(image):
     gray = image.convert("L")
-    brightness = np.array(gray).mean()
+    img_array = np.array(gray)
 
-    if brightness > 170:
-        return "Dry"
-    elif brightness < 100:
+    brightness = img_array.mean()
+    contrast = img_array.std()
+
+    # Improved logic (not always Normal)
+    if brightness < 115 and contrast > 40:
         return "Oily"
+    elif brightness > 160 and contrast < 35:
+        return "Dry"
     else:
         return "Normal"
 
-# ======================
-# Recommendation Logic
-# ======================
-if image_file is not None:
-    image = Image.open(image_file)
-
-    skin_type = detect_skin_type(image)
-
-    st.subheader("🧪 Detected Skin Type")
-    st.success(skin_type)
-
-    if "Skin_Type" in df.columns:
-        products = df[df["Skin_Type"] == skin_type]
-
-        if products.empty:
-            st.warning("No products found for this skin type.")
-        else:
-            recommended = products.sample(5) if len(products) >= 5 else products
-
-            st.subheader("🛍 Recommended Products (Top 5)")
-            st.dataframe(
-                recommended[["Product_Code", "Product_Name", "Brand"]]
-                .reset_index(drop=True)
-            )
-    else:
-        st.error("Column 'Skin_Type' not found in Excel file")
-
-else:
-    st.info("Please capture an image to get recommendations")
+# =====================

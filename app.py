@@ -3,25 +3,25 @@ import pandas as pd
 from PIL import Image, ImageStat
 import random
 
-# --- Page Config ---
+# --- Page Configuration ---
 st.set_page_config(
     page_title="Skin Care Product Recommender",
     page_icon="💛",
     layout="wide"
 )
 
-# --- Gold Theme Styling ---
+# --- Colorful Theme Styling ---
 st.markdown("""
 <style>
 body {
-    background-color: #fff8f0;
+    background-color: #fffaf0;
 }
 .stButton>button {
-    background-color: #FFD700;
+    background: linear-gradient(90deg, #FFD700, #FFB347);
     color: black;
     font-size: 16px;
     font-weight: bold;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 8px 20px;
     margin-top: 10px;
 }
@@ -31,6 +31,11 @@ div[data-baseweb="card"] {
     border-radius: 12px;
     padding: 10px;
     margin-bottom: 10px;
+    transition: transform 0.2s;
+}
+div[data-baseweb="card"]:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -42,7 +47,7 @@ except:
     st.warning("Gold-themed banner not found, skipping...")
 
 st.title("💛 Skin Care Product Recommender App")
-st.write("Capture your face using webcam to get personalized skin care recommendations!")
+st.write("Capture your face using webcam to get colorful, personalized skin care recommendations!")
 
 # --- Load Dataset ---
 @st.cache_data
@@ -70,6 +75,9 @@ def brightness_to_skin_type(brightness):
 def skin_emoji(skin_type):
     return {"dry":"💧 Dry", "normal":"🌿 Normal", "oily":"💦 Oily"}.get(skin_type, skin_type)
 
+def skin_color(skin_type):
+    return {"dry":"#FF6B6B","normal":"#6BCB77","oily":"#4D96FF"}.get(skin_type, "#FFD700")
+
 # --- Session State ---
 if "step" not in st.session_state: st.session_state.step = 1
 if "brightness_skin_type" not in st.session_state: st.session_state.brightness_skin_type = None
@@ -79,7 +87,7 @@ if "quiz_skin_type" not in st.session_state: st.session_state.quiz_skin_type = N
 steps = ["📷 Webcam", "📝 Quiz", "🛍️ Products"]
 st.markdown(" | ".join([f"**{s}**" if i+1==st.session_state.step else s for i,s in enumerate(steps)]))
 
-# --- Progress Bar ---
+# --- Progress Bar with Gradient ---
 st.progress(min(st.session_state.step/3.0, 1.0))
 
 # --- Step 1: Webcam (Mandatory) ---
@@ -92,7 +100,8 @@ if st.session_state.step == 1:
         st.image(image, caption="Your Captured Face", use_column_width=True)
         brightness = get_brightness(image)
         st.session_state.brightness_skin_type = brightness_to_skin_type(brightness)
-        st.markdown(f"<div style='background-color:#FFD700; padding:10px; border-radius:10px;'>"
+        st.markdown(f"<div style='background-color:{skin_color(st.session_state.brightness_skin_type)}; "
+                    f"padding:10px; border-radius:12px; color:white;'>"
                     f"✅ Detected Skin Type: <b>{skin_emoji(st.session_state.brightness_skin_type)}</b></div>",
                     unsafe_allow_html=True)
 
@@ -127,7 +136,7 @@ elif st.session_state.step == 2:
     elif score <=16: st.session_state.quiz_skin_type = "normal"
     else: st.session_state.quiz_skin_type = "oily"
 
-    st.markdown(f"<div style='background-color:#FFD700; padding:10px; border-radius:10px;'>"
+    st.markdown(f"<div style='background-color:{skin_color(st.session_state.quiz_skin_type)}; padding:10px; border-radius:12px; color:white;'>"
                 f"📝 Quiz-based Skin Type: <b>{skin_emoji(st.session_state.quiz_skin_type)}</b></div>",
                 unsafe_allow_html=True)
 
@@ -140,7 +149,7 @@ elif st.session_state.step == 3:
 
     final_skin_type = st.session_state.brightness_skin_type or st.session_state.quiz_skin_type
 
-    st.markdown(f"<div style='background-color:#FFD700; padding:15px; border-radius:10px;'>"
+    st.markdown(f"<div style='background-color:{skin_color(final_skin_type)}; padding:15px; border-radius:12px; color:white;'>"
                 f"💛 Your Skin Type: <b>{skin_emoji(final_skin_type)}</b></div>", unsafe_allow_html=True)
 
     skin_col = next((c for c in df.columns if "skin" in c and "type" in c), None)
@@ -153,14 +162,4 @@ elif st.session_state.step == 3:
                     st.markdown(f"**{row['product_name']}**")
                     if "price" in df.columns: st.write(f"💰 {row['price']}")
                     if "description" in df.columns: st.write(f"📝 {row['description']}")
-                    if "image_url" in df.columns and pd.notna(row["image_url"]): st.image(row["image_url"], width=200)
-                    st.markdown("---")
-        else:
-            st.warning("No products found for this skin type.")
-    else:
-        st.error("Skin type column not found in dataset.")
-
-    if st.button("Restart"):
-        st.session_state.step = 1
-        st.session_state.brightness_skin_type = None
-        st.session_state.quiz_skin_type = None
+                    if "image_url" in df.columns and pd.notna(r_

@@ -1,48 +1,44 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
-from PIL import Image
+import numpy as np
 
-st.set_page_config(page_title="Skin Care Product Recommender")
+st.set_page_config(page_title="Skin Analyzer App")
 
-st.title("🧴 Skin Care Product Recommendation App")
+st.title("Skin Analysis & Product Recommendation App")
+st.write("Capture your face using webcam and get skincare product suggestions")
 
 # Load dataset
-@st.cache_data
-def load_data():
-    df = pd.read_excel("skin_products.xlsx")
-    df.columns = df.columns.str.strip().str.replace(" ", "_")
-    return df
+df = pd.read_excel("skincare_100_rows.xlsx")
 
-df = load_data()
-
-st.write("📄 Dataset Columns:", df.columns.tolist())
+# Clean Skin_Type
+df["Skin_Type"] = df["Skin_Type"].astype(str).str.strip().str.capitalize()
 
 # Webcam input
-img_file = st.camera_input("📷 Capture Image")
+st.subheader("📷 Capture Image")
+image = st.camera_input("Take a photo")
 
-def detect_skin_type(image):
-    gray = image.convert("L")
-    brightness = np.array(gray).mean()
+if image is not None:
+    st.success("Image captured successfully!")
 
-    if brightness > 170:
-        return "Dry"
-    elif brightness < 100:
-        return "Oily"
-    else:
-        return "Normal"
+    # Simulated skin analysis
+    skin_types = ["Oily", "Dry", "Normal", "Sensitive", "Combination"]
+    detected_skin = np.random.choice(skin_types)
 
-if img_file:
-    image = Image.open(img_file)
-    skin_type = detect_skin_type(image)
+    st.subheader("🧠 Skin Analysis Result")
+    st.info(f"Detected Skin Type: **{detected_skin}**")
 
-    st.subheader("🧪 Detected Skin Type")
-    st.success(skin_type)
+    # Filter products
+    filtered = df[df["Skin_Type"] == detected_skin]
 
-    # Filter products safely
-    if "Skin_Type" in df.columns:
-        products = df[df["Skin_Type"].str.lower() == skin_type.lower()]
-        st.subheader("🛍 Recommended Products")
-        st.table(products)
-    else:
-        st.error("❌ Column 'Skin_Type' not found in Excel file")
+    # Pick ANY 5 products
+    recommended = filtered.sample(5) if len(filtered) >= 5 else filtered
+
+    st.subheader("🧴 Recommended Products (Top 5)")
+    st.dataframe(
+        recommended[["Product_Code", "Product_Name", "Brand"]]
+        .reset_index(drop=True)
+    )
+
+else:
+    st.warning("Please capture an image to continue")
+

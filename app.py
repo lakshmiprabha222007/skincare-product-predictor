@@ -32,11 +32,11 @@ st.subheader("📷 Capture Image")
 image_file = st.camera_input("Take a photo")
 
 # ======================
-# Skin Type Detection (Simple Logic)
+# Skin Type Detection
 # ======================
 def detect_skin_type(image):
-    gray = image.convert("L")          # Convert to grayscale
-    brightness = np.array(gray).mean() # Average brightness
+    gray = image.convert("L")
+    brightness = np.array(gray).mean()
 
     if brightness > 170:
         return "Dry"
@@ -46,7 +46,7 @@ def detect_skin_type(image):
         return "Normal"
 
 # ======================
-# After Image Capture
+# Recommendation Logic
 # ======================
 if image_file is not None:
     image = Image.open(image_file)
@@ -56,30 +56,21 @@ if image_file is not None:
     st.subheader("🧪 Detected Skin Type")
     st.success(skin_type)
 
-    # ======================
-    # Product Recommendation
-    # ======================
     if "Skin_Type" in df.columns:
-        filtered_products = df[df["Skin_Type"] == skin_type]
+        products = df[df["Skin_Type"] == skin_type]
 
-        if filtered_products.empty:
+        if products.empty:
             st.warning("No products found for this skin type.")
         else:
-            # Recommend up to 5 products
-            recommended = (
-                filtered_products.sample(5)
-                if len(filtered_products) >= 5
-                else filtered_products
-            )
+            recommended = products.sample(5) if len(products) >= 5 else products
 
-            st.subheader("🛍 Recommended Products")
+            st.subheader("🛍 Recommended Products (Top 5)")
             st.dataframe(
                 recommended[["Product_Code", "Product_Name", "Brand"]]
                 .reset_index(drop=True)
             )
     else:
-        st.error("❌ 'Skin_Type' column not found in Excel file")
+        st.error("Column 'Skin_Type' not found in Excel file")
 
 else:
-    st.i
-
+    st.info("Please capture an image to get recommendations")

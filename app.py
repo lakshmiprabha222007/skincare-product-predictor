@@ -2,12 +2,34 @@ import streamlit as st
 import pandas as pd
 from PIL import Image, ImageStat
 
-st.set_page_config(page_title="Skin Care Product Recommender")
+# --- Theme and Page Config ---
+st.set_page_config(
+    page_title="Skin Care Product Recommender",
+    page_icon="🧴",
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
+
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #FFF9F0;
+    }
+    .stButton>button {
+        background-color: #FFB347;
+        color: white;
+        font-weight: bold;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.title("🧴 Skin Care Product Recommendation App")
-st.write("Go step by step: Webcam → Quiz → Product Recommendations")
+st.write("Step by step: Webcam → Quiz → Product Recommendations")
 
-# Load dataset safely
+# --- Load dataset ---
 @st.cache_data
 def load_data():
     df = pd.read_excel("skin_products.xlsx")
@@ -30,6 +52,14 @@ def brightness_to_skin_type(brightness):
     else:
         return "oily"
 
+def skincare_tips(skin_type):
+    tips = {
+        "dry": "💧 Use hydrating cleansers and moisturizers. Avoid harsh soaps.",
+        "normal": "😊 Maintain a balanced routine and protect skin from sun.",
+        "oily": "🧼 Use gentle foaming cleansers. Exfoliate to control oil."
+    }
+    return tips.get(skin_type, "")
+
 # --- Initialize session state ---
 if "step" not in st.session_state:
     st.session_state.step = 1
@@ -37,6 +67,10 @@ if "brightness_skin_type" not in st.session_state:
     st.session_state.brightness_skin_type = None
 if "quiz_skin_type" not in st.session_state:
     st.session_state.quiz_skin_type = None
+
+# --- Sidebar Progress ---
+st.sidebar.title("Steps")
+st.sidebar.info(f"Step {st.session_state.step}/3")
 
 # --- Step 1: Webcam ---
 if st.session_state.step == 1:
@@ -50,6 +84,7 @@ if st.session_state.step == 1:
         st.write(f"🌞 Estimated brightness: {brightness:.2f}")
         st.session_state.brightness_skin_type = brightness_to_skin_type(brightness)
         st.write(f"🧴 Predicted skin type: **{st.session_state.brightness_skin_type}**")
+        st.write(skincare_tips(st.session_state.brightness_skin_type))
 
     if st.button("Next: Skin Quiz"):
         st.session_state.step = 2
@@ -78,7 +113,6 @@ elif st.session_state.step == 2:
         else:
             score += 3
 
-    # Map score to skin type
     if score <= 10:
         st.session_state.quiz_skin_type = "dry"
     elif score <= 16:
@@ -87,6 +121,7 @@ elif st.session_state.step == 2:
         st.session_state.quiz_skin_type = "oily"
 
     st.write(f"🧴 Quiz-based predicted skin type: **{st.session_state.quiz_skin_type}**")
+    st.write(skincare_tips(st.session_state.quiz_skin_type))
 
     if st.button("Next: Recommended Products"):
         st.session_state.step = 3
@@ -97,9 +132,9 @@ elif st.session_state.step == 3:
 
     manual_skin_type = st.radio("Or select your skin type manually", ["dry", "normal", "oily"])
 
-    # Final skin type priority: Webcam > Quiz > Manual
     final_skin_type = st.session_state.brightness_skin_type or st.session_state.quiz_skin_type or manual_skin_type
-    st.write(f"✅ Final skin type used for recommendations: **{final_skin_type}**")
+    st.write(f"✅ Final skin type: **{final_skin_type}**")
+    st.write(skincare_tips(final_skin_type))
 
     # Find skin type column
     skin_col = None
@@ -111,14 +146,4 @@ elif st.session_state.step == 3:
     if skin_col is None:
         st.error("❌ Skin type column not found in dataset")
     else:
-        products = df[df[skin_col].str.lower() == final_skin_type]
-        if not products.empty:
-            st.table(products.head(5))
-        else:
-            st.warning("No products found for this skin type.")
 
-    # Restart button
-    if st.button("Restart"):
-        st.session_state.step = 1
-        st.session_state.brightness_skin_type = None
-        st.session_state.quiz_skin_type = None

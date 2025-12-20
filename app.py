@@ -1,44 +1,48 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
+from PIL import Image
 
-st.set_page_config(page_title="Skin Analyzer App")
+st.set_page_config(page_title="Skin Care Product Recommender")
 
-st.title("Skin Analysis & Product Recommendation App")
-st.write("Capture your face using webcam and get skincare product suggestions")
+st.title("🧴 Skin Care Product Recommendation App")
 
 # Load dataset
-df = pd.read_excel("skincare_100_rows.xlsx")
+@st.cache_data
+def load_data():
+    df = pd.read_excel("skin_products.xlsx")
+    df.columns = df.columns.str.strip().str.replace(" ", "_")
+    return df
 
-# Clean Skin_Type
-df["Skin_Type"] = df["Skin_Type"].astype(str).str.strip().str.capitalize()
+df = load_data()
+
+st.write("📄 Dataset Columns:", df.columns.tolist())
 
 # Webcam input
-st.subheader("📷 Capture Image")
-image = st.camera_input("Take a photo")
+img_file = st.camera_input("📷 Capture Image")
 
-if image is not None:
-    st.success("Image captured successfully!")
+def detect_skin_type(image):
+    gray = image.convert("L")
+    brightness = np.array(gray).mean()
 
-    # Simulated skin analysis
-    skin_types = ["Oily", "Dry", "Normal", "Sensitive", "Combination"]
-    detected_skin = np.random.choice(skin_types)
+    if brightness > 170:
+        return "Dry"
+    elif brightness < 100:
+        return "Oily"
+    else:
+        return "Normal"
 
-    st.subheader("🧠 Skin Analysis Result")
-    st.info(f"Detected Skin Type: **{detected_skin}**")
+if img_file:
+    image = Image.open(img_file)
+    skin_type = detect_skin_type(image)
 
-    # Filter products
-    filtered = df[df["Skin_Type"] == detected_skin]
+    st.subheader("🧪 Detected Skin Type")
+    st.success(skin_type)
 
-    # Pick ANY 5 products
-    recommended = filtered.sample(5) if len(filtered) >= 5 else filtered
-
-    st.subheader("🧴 Recommended Products (Top 5)")
-    st.dataframe(
-        recommended[["Product_Code", "Product_Name", "Brand"]]
-        .reset_index(drop=True)
-    )
-
-else:
-    st.warning("Please capture an image to continue")
-
+    # Filter products safely
+    if "Skin_Type" in df.columns:
+        products = df[df["Skin_Type"].str.lower() == skin_type.lower()]
+        st.subheader("🛍 Recommended Products")
+        st.table(products)
+    else:
+        st.error("❌ Column 'Skin_Type' not found in Excel file")

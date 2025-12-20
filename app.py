@@ -38,9 +38,9 @@ def detect_skin_type(image):
     brightness = pixels.mean()
     st.write("📊 Brightness:", round(brightness, 2))
 
-    if brightness > 150:
+    if brightness > 50:
         return "dry"
-    elif brightness < 120:
+    elif brightness < 20:
         return "oily"
     else:
         return "normal"

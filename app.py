@@ -49,7 +49,7 @@ if st.session_state.step == 1:
 
     if img_file is not None:
         image = Image.open(img_file)
-        st.image(image, caption="Captured Image", use_column_width=True)
+        st.image(image, caption="Captured Image", use_container_width=True)
         brightness = get_brightness(image)
         st.write(f"🌞 Estimated brightness: {brightness:.2f}")
         st.session_state.brightness_skin_type = brightness_to_skin_type(brightness)
@@ -130,7 +130,7 @@ elif st.session_state.step == 3:
     if skin_col is None:
         st.error("❌ Skin type column not found in dataset")
     else:
-        products = df[df[skin_col].str.lower() == final_skin_type]
+        products = df[df[skin_col].astype(str).str.lower() == final_skin_type]
         if not products.empty:
             st.table(products.head(5))
         else:

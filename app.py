@@ -10,145 +10,253 @@ st.set_page_config(
 )
 
 # ============================================================
-# ----------  CUSTOM THEME (Glassmorphism + Gradient)  -------
+# ----------  DARK THEME + ANIMATED RAYS  --------------------
 # ============================================================
 st.markdown("""
 <style>
-    /* ---------- Import a nice font ---------- */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
     html, body, [class*="css"] {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
 
-    /* ---------- Animated gradient background ---------- */
+    /* ---------- Deep dark background ---------- */
     .stApp {
-        background: linear-gradient(-45deg, #fce4ec, #e1bee7, #b3e5fc, #c8e6c9);
-        background-size: 400% 400%;
-        animation: gradientBG 15s ease infinite;
+        background: #05060a;
+        color: #e6e6f0;
+        position: relative;
+        overflow-x: hidden;
     }
 
-    @keyframes gradientBG {
-        0%   { background-position: 0% 50%; }
-        50%  { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    /* ---------- Animated glowing rays (background) ---------- */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+            conic-gradient(
+                from 0deg at 50% 50%,
+                transparent 0deg,
+                rgba(139, 92, 246, 0.18) 40deg,
+                transparent 90deg,
+                rgba(236, 72, 153, 0.18) 150deg,
+                transparent 200deg,
+                rgba(56, 189, 248, 0.18) 260deg,
+                transparent 320deg,
+                transparent 360deg
+            );
+        animation: rotateRays 25s linear infinite;
+        z-index: 0;
+        pointer-events: none;
+        filter: blur(60px);
     }
 
-    /* ---------- Glass card effect for main block ---------- */
+    /* ---------- Second ray layer (opposite rotation) ---------- */
+    .stApp::after {
+        content: "";
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+            conic-gradient(
+                from 180deg at 50% 50%,
+                transparent 0deg,
+                rgba(99, 102, 241, 0.15) 60deg,
+                transparent 120deg,
+                rgba(217, 70, 239, 0.15) 200deg,
+                transparent 280deg,
+                transparent 360deg
+            );
+        animation: rotateRaysReverse 35s linear infinite;
+        z-index: 0;
+        pointer-events: none;
+        filter: blur(80px);
+    }
+
+    @keyframes rotateRays {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+    @keyframes rotateRaysReverse {
+        from { transform: rotate(360deg); }
+        to   { transform: rotate(0deg); }
+    }
+
+    /* ---------- Content sits above the rays ---------- */
     .block-container {
-        background: rgba(255, 255, 255, 0.55);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        position: relative;
+        z-index: 2;
+        background: rgba(15, 15, 25, 0.55);
+        backdrop-filter: blur(20px) saturate(140%);
+        -webkit-backdrop-filter: blur(20px) saturate(140%);
         border-radius: 24px;
         padding: 2.5rem 2.5rem 3rem 2.5rem;
         margin-top: 2rem;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        max-width: 800px;
+        max-width: 820px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,0.03),
+            0 20px 60px rgba(0, 0, 0, 0.6),
+            0 0 100px rgba(139, 92, 246, 0.15);
     }
 
-    /* ---------- Title styling ---------- */
+    /* ---------- Headings ---------- */
     h1 {
-        background: linear-gradient(90deg, #ec407a, #ab47bc, #42a5f5);
+        font-weight: 800 !important;
+        text-align: center;
+        font-size: 2.6rem !important;
+        letter-spacing: -0.02em;
+        background: linear-gradient(120deg, #a78bfa, #f472b6, #38bdf8);
+        background-size: 200% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        font-weight: 700 !important;
-        text-align: center;
-        font-size: 2.4rem !important;
+        animation: shine 6s linear infinite;
+    }
+
+    @keyframes shine {
+        to { background-position: 200% center; }
     }
 
     h2, h3 {
-        color: #6a1b9a;
-        font-weight: 600 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.01em;
     }
 
-    /* ---------- Subheader ---------- */
-    .stMarkdown p {
-        color: #444;
+    /* ---------- Body text ---------- */
+    p, label, .stMarkdown, .stCaption, [data-testid="stCaptionContainer"] {
+        color: #c9c9d6 !important;
+    }
+
+    /* ---------- Progress bar ---------- */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #8b5cf6, #ec4899, #38bdf8);
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+    }
+    .stProgress > div > div > div {
+        background: rgba(255,255,255,0.06);
     }
 
     /* ---------- Buttons ---------- */
     .stButton > button {
-        background: linear-gradient(90deg, #ec407a, #ab47bc);
-        color: white;
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        color: #fff;
         border: none;
-        border-radius: 30px;
-        padding: 0.6rem 1.6rem;
+        border-radius: 12px;
+        padding: 0.65rem 1.5rem;
         font-weight: 600;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(236, 64, 122, 0.35);
+        letter-spacing: 0.02em;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
         width: 100%;
     }
 
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 22px rgba(171, 71, 188, 0.5);
-        background: linear-gradient(90deg, #ab47bc, #ec407a);
-        color: white;
+        box-shadow: 0 8px 30px rgba(236, 72, 153, 0.55);
+        color: #fff;
     }
 
-    /* ---------- Radio buttons ---------- */
+    .stButton > button:focus {
+        color: #fff !important;
+        border: none !important;
+    }
+
+    /* ---------- Radio chips ---------- */
     .stRadio > div {
-        background: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px;
-        padding: 0.8rem 1rem;
+        padding: 0.85rem 1rem;
         margin-bottom: 0.6rem;
-        border: 1px solid rgba(171, 71, 188, 0.15);
         transition: all 0.2s ease;
     }
 
     .stRadio > div:hover {
-        border: 1px solid rgba(171, 71, 188, 0.4);
-        box-shadow: 0 2px 10px rgba(171, 71, 188, 0.15);
+        border: 1px solid rgba(139, 92, 246, 0.6);
+        box-shadow: 0 0 24px rgba(139, 92, 246, 0.25);
+        background: rgba(139, 92, 246, 0.06);
+    }
+
+    /* ---------- Camera widget ---------- */
+    [data-testid="stCameraInput"] {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
 
     /* ---------- Table ---------- */
     .stTable, table {
         border-radius: 14px !important;
         overflow: hidden;
-        background: rgba(255, 255, 255, 0.85) !important;
+        background: rgba(20, 20, 32, 0.9) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
     }
-
     thead tr th {
-        background: linear-gradient(90deg, #ec407a, #ab47bc) !important;
-        color: white !important;
+        background: linear-gradient(135deg, #8b5cf6, #ec4899) !important;
+        color: #fff !important;
         font-weight: 600 !important;
         text-align: center !important;
+        border: none !important;
     }
-
     tbody tr td {
         text-align: center !important;
-        color: #333 !important;
+        color: #e6e6f0 !important;
+        border-color: rgba(255,255,255,0.05) !important;
+    }
+    tbody tr:nth-child(even) {
+        background: rgba(255,255,255,0.02) !important;
     }
 
-    /* ---------- Camera input ---------- */
-    [data-testid="stCameraInput"] {
-        border-radius: 18px;
-        overflow: hidden;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
-
-    /* ---------- Alerts (success / warning / error) ---------- */
+    /* ---------- Alerts ---------- */
     .stAlert {
         border-radius: 14px;
-        backdrop-filter: blur(6px);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.08);
     }
 
-    /* ---------- Metric text ---------- */
+    /* ---------- Image ---------- */
+    img {
+        border-radius: 14px;
+    }
+
+    /* ---------- Hide Streamlit chrome for a cleaner look ---------- */
+    #MainMenu, footer, header { visibility: hidden; }
+    [data-testid="stToolbar"] { display: none; }
+
+    /* ---------- Strong text highlight ---------- */
     .stMarkdown strong {
-        color: #ad1457;
+        color: #f472b6;
+        font-weight: 700;
+    }
+
+    /* ---------- Scrollbar ---------- */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0b12; }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(#8b5cf6, #ec4899);
+        border-radius: 8px;
     }
 </style>
 """, unsafe_allow_html=True)
 # ============================================================
 
 
-# ---------- Hero title ----------
-st.title("🧴 Glow — Skin Care Recommender")
-st.write("✨ *Discover your perfect skincare routine in 3 simple steps.*")
+# ---------- Hero ----------
+st.title("🧴 Glow")
+st.markdown(
+    "<p style='text-align:center;color:#a1a1b5;font-size:1.05rem;margin-top:-0.6rem;'>"
+    "Discover your perfect skincare routine in 3 simple steps.</p>",
+    unsafe_allow_html=True,
+)
 
 # -------- Load dataset safely --------
 @st.cache_data
@@ -185,14 +293,15 @@ if "brightness_skin_type" not in st.session_state:
 if "quiz_skin_type" not in st.session_state:
     st.session_state.quiz_skin_type = None
 
-# -------- Progress bar ----------
+# -------- Progress ----------
 progress = {1: 33, 2: 66, 3: 100}[st.session_state.step]
 st.progress(progress, text=f"Step {st.session_state.step} of 3")
+st.write("")
 
 # -------- Step 1: Webcam --------
 if st.session_state.step == 1:
-    st.subheader("📸 Step 1: Capture your face (Optional)")
-    st.caption("We'll estimate your skin type from image brightness. You can skip this.")
+    st.subheader("📸 Step 1 — Capture your face")
+    st.caption("Optional. We'll estimate your skin type from image brightness.")
     img_file = st.camera_input("📷 Capture Image")
 
     if img_file is not None:
@@ -204,13 +313,13 @@ if st.session_state.step == 1:
         st.success(f"🧴 Predicted skin type: **{st.session_state.brightness_skin_type}**")
 
     st.write("")
-    if st.button("Next: Skin Quiz ➡️"):
+    if st.button("Next → Skin Quiz"):
         st.session_state.step = 2
         st.rerun()
 
 # -------- Step 2: Quiz --------
 elif st.session_state.step == 2:
-    st.subheader("📝 Step 2: Take a detailed skin quiz (Optional)")
+    st.subheader("📝 Step 2 — Skin Quiz")
     st.caption("Answer 8 quick questions for a more accurate result.")
 
     q1 = st.radio("How does your skin feel after washing your face?",
@@ -255,17 +364,17 @@ elif st.session_state.step == 2:
     st.write("")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("⬅️ Back"):
+        if st.button("← Back"):
             st.session_state.step = 1
             st.rerun()
     with col2:
-        if st.button("Next: Recommendations ➡️"):
+        if st.button("Next → Recommendations"):
             st.session_state.step = 3
             st.rerun()
 
 # -------- Step 3: Recommendation --------
 elif st.session_state.step == 3:
-    st.subheader("💎 Step 3: Your Recommended Products")
+    st.subheader("💎 Step 3 — Your Recommendations")
 
     manual_skin_type = st.radio(
         "Or select your skin type manually",
@@ -279,7 +388,7 @@ elif st.session_state.step == 3:
         or manual_skin_type
     )
 
-    st.success(f"✅ Final skin type used for recommendations: **{final_skin_type}**")
+    st.success(f"✅ Final skin type: **{final_skin_type}**")
 
     skin_col = None
     for col in df.columns:
@@ -292,7 +401,7 @@ elif st.session_state.step == 3:
     else:
         products = df[df[skin_col].astype(str).str.lower() == final_skin_type]
         if not products.empty:
-            st.write("### 🌟 Top Picks For You")
+            st.markdown("### 🌟 Top Picks For You")
             st.table(products.head(5))
         else:
             st.warning("No products found for this skin type.")
@@ -300,7 +409,7 @@ elif st.session_state.step == 3:
     st.write("")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("⬅️ Back"):
+        if st.button("← Back"):
             st.session_state.step = 2
             st.rerun()
     with col2:

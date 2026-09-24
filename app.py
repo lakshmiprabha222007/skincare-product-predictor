@@ -3,7 +3,7 @@ import pandas as pd
 from PIL import Image, ImageStat
 
 st.set_page_config(
-    page_title="Glow • Skin Care Recommender",
+    page_title="GlowQ • Skin Care Recommender",
     page_icon="🧴",
     layout="centered",
     initial_sidebar_state="collapsed",

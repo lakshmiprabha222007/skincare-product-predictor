@@ -10,17 +10,14 @@ st.set_page_config(
 )
 
 # ============================================================
-# ----------  DARK THEME + ANIMATED RAYS  --------------------
+# ===================  1. THEME / CSS  =======================
 # ============================================================
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
-    /* ---------- Deep dark background ---------- */
     .stApp {
         background: #05060a;
         color: #e6e6f0;
@@ -28,66 +25,54 @@ st.markdown("""
         overflow-x: hidden;
     }
 
-    /* ---------- Animated glowing rays (background) ---------- */
+    /* ---- Animated glowing rays (layer 1) ---- */
     .stApp::before {
         content: "";
         position: fixed;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background:
-            conic-gradient(
-                from 0deg at 50% 50%,
-                transparent 0deg,
-                rgba(139, 92, 246, 0.18) 40deg,
-                transparent 90deg,
-                rgba(236, 72, 153, 0.18) 150deg,
-                transparent 200deg,
-                rgba(56, 189, 248, 0.18) 260deg,
-                transparent 320deg,
-                transparent 360deg
-            );
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: conic-gradient(
+            from 0deg at 50% 50%,
+            transparent 0deg,
+            rgba(139, 92, 246, 0.18) 40deg,
+            transparent 90deg,
+            rgba(236, 72, 153, 0.18) 150deg,
+            transparent 200deg,
+            rgba(56, 189, 248, 0.18) 260deg,
+            transparent 320deg,
+            transparent 360deg
+        );
         animation: rotateRays 25s linear infinite;
         z-index: 0;
         pointer-events: none;
         filter: blur(60px);
     }
 
-    /* ---------- Second ray layer (opposite rotation) ---------- */
+    /* ---- Animated glowing rays (layer 2) ---- */
     .stApp::after {
         content: "";
         position: fixed;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background:
-            conic-gradient(
-                from 180deg at 50% 50%,
-                transparent 0deg,
-                rgba(99, 102, 241, 0.15) 60deg,
-                transparent 120deg,
-                rgba(217, 70, 239, 0.15) 200deg,
-                transparent 280deg,
-                transparent 360deg
-            );
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: conic-gradient(
+            from 180deg at 50% 50%,
+            transparent 0deg,
+            rgba(99, 102, 241, 0.15) 60deg,
+            transparent 120deg,
+            rgba(217, 70, 239, 0.15) 200deg,
+            transparent 280deg,
+            transparent 360deg
+        );
         animation: rotateRaysReverse 35s linear infinite;
         z-index: 0;
         pointer-events: none;
         filter: blur(80px);
     }
 
-    @keyframes rotateRays {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
-    }
-    @keyframes rotateRaysReverse {
-        from { transform: rotate(360deg); }
-        to   { transform: rotate(0deg); }
-    }
+    @keyframes rotateRays        { from { transform: rotate(0deg);   } to { transform: rotate(360deg); } }
+    @keyframes rotateRaysReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg);   } }
 
-    /* ---------- Content sits above the rays ---------- */
+    /* ---- Glass content card ---- */
     .block-container {
         position: relative;
         z-index: 2;
@@ -106,7 +91,6 @@ st.markdown("""
             0 0 100px rgba(139, 92, 246, 0.15);
     }
 
-    /* ---------- Headings ---------- */
     h1 {
         font-weight: 800 !important;
         text-align: center;
@@ -119,32 +103,20 @@ st.markdown("""
         background-clip: text;
         animation: shine 6s linear infinite;
     }
+    @keyframes shine { to { background-position: 200% center; } }
 
-    @keyframes shine {
-        to { background-position: 200% center; }
-    }
+    h2, h3 { color: #ffffff !important; font-weight: 700 !important; }
 
-    h2, h3 {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.01em;
-    }
-
-    /* ---------- Body text ---------- */
     p, label, .stMarkdown, .stCaption, [data-testid="stCaptionContainer"] {
         color: #c9c9d6 !important;
     }
 
-    /* ---------- Progress bar ---------- */
     .stProgress > div > div > div > div {
         background: linear-gradient(90deg, #8b5cf6, #ec4899, #38bdf8);
         box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
     }
-    .stProgress > div > div > div {
-        background: rgba(255,255,255,0.06);
-    }
+    .stProgress > div > div > div { background: rgba(255,255,255,0.06); }
 
-    /* ---------- Buttons ---------- */
     .stButton > button {
         background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
         color: #fff;
@@ -152,24 +124,17 @@ st.markdown("""
         border-radius: 12px;
         padding: 0.65rem 1.5rem;
         font-weight: 600;
-        letter-spacing: 0.02em;
         transition: all 0.25s ease;
         box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
         width: 100%;
     }
-
     .stButton > button:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 30px rgba(236, 72, 153, 0.55);
         color: #fff;
     }
+    .stButton > button:focus { color: #fff !important; border: none !important; }
 
-    .stButton > button:focus {
-        color: #fff !important;
-        border: none !important;
-    }
-
-    /* ---------- Radio chips ---------- */
     .stRadio > div {
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -178,14 +143,12 @@ st.markdown("""
         margin-bottom: 0.6rem;
         transition: all 0.2s ease;
     }
-
     .stRadio > div:hover {
         border: 1px solid rgba(139, 92, 246, 0.6);
         box-shadow: 0 0 24px rgba(139, 92, 246, 0.25);
         background: rgba(139, 92, 246, 0.06);
     }
 
-    /* ---------- Camera widget ---------- */
     [data-testid="stCameraInput"] {
         border-radius: 16px;
         overflow: hidden;
@@ -193,7 +156,6 @@ st.markdown("""
         box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
 
-    /* ---------- Table ---------- */
     .stTable, table {
         border-radius: 14px !important;
         overflow: hidden;
@@ -212,43 +174,31 @@ st.markdown("""
         color: #e6e6f0 !important;
         border-color: rgba(255,255,255,0.05) !important;
     }
-    tbody tr:nth-child(even) {
-        background: rgba(255,255,255,0.02) !important;
-    }
+    tbody tr:nth-child(even) { background: rgba(255,255,255,0.02) !important; }
 
-    /* ---------- Alerts ---------- */
     .stAlert {
         border-radius: 14px;
         backdrop-filter: blur(8px);
         border: 1px solid rgba(255,255,255,0.08);
     }
 
-    /* ---------- Image ---------- */
-    img {
-        border-radius: 14px;
-    }
+    img { border-radius: 14px; }
 
-    /* ---------- Hide Streamlit chrome for a cleaner look ---------- */
     #MainMenu, footer, header { visibility: hidden; }
     [data-testid="stToolbar"] { display: none; }
 
-    /* ---------- Strong text highlight ---------- */
-    .stMarkdown strong {
-        color: #f472b6;
-        font-weight: 700;
-    }
+    .stMarkdown strong { color: #f472b6; font-weight: 700; }
 
-    /* ---------- Scrollbar ---------- */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #0a0b12; }
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(#8b5cf6, #ec4899);
-        border-radius: 8px;
-    }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(#8b5cf6, #ec4899); border-radius: 8px; }
 </style>
 """, unsafe_allow_html=True)
-# ============================================================
 
+
+# ============================================================
+# ===================  2. ACTUAL APP CONTENT  ================
+# ============================================================
 
 # ---------- Hero ----------
 st.title("🧴 Glow")
@@ -267,15 +217,14 @@ def load_data():
 
 try:
     df = load_data()
-except Exception as e:
+except Exception:
     st.error("❌ skin_products.xlsx not found or cannot be read")
     st.stop()
 
 # -------- Functions --------
 def get_brightness(img):
     img = img.convert("L")
-    stat = ImageStat.Stat(img)
-    return stat.mean[0]
+    return ImageStat.Stat(img).mean[0]
 
 def brightness_to_skin_type(brightness):
     if brightness < 90:
@@ -293,7 +242,7 @@ if "brightness_skin_type" not in st.session_state:
 if "quiz_skin_type" not in st.session_state:
     st.session_state.quiz_skin_type = None
 
-# -------- Progress ----------
+# -------- Progress bar --------
 progress = {1: 33, 2: 66, 3: 100}[st.session_state.step]
 st.progress(progress, text=f"Step {st.session_state.step} of 3")
 st.write("")
@@ -340,9 +289,7 @@ elif st.session_state.step == 2:
                   ["Very visible", "Slightly visible", "Not visible"])
 
     score = 0
-    answers = [q1, q2, q3, q4, q5, q6, q7, q8]
-
-    for ans in answers:
+    for ans in [q1, q2, q3, q4, q5, q6, q7, q8]:
         if ans in ["Tight or dry", "Rarely", "Small/Invisible",
                    "Never", "Very sensitive", "Very visible"]:
             score += 1

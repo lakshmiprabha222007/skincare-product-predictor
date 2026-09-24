@@ -302,7 +302,7 @@ def render_hero(subtitle: str, badge: str = "✨ AI-POWERED SKINCARE"):
         f"<div class='badge-wrap'><span class='hero-badge'>{badge}</span></div>",
         unsafe_allow_html=True,
     )
-    st.title("🧴 Glow")
+    st.title("🧴 GlowQ")
     st.markdown(f"<p class='hero-sub'>{subtitle}</p>", unsafe_allow_html=True)
 
 

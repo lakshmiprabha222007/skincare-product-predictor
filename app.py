@@ -490,12 +490,6 @@ def main_app():
     elif st.session_state.step == 3:
         st.markdown("### 💎 Step 3 — Your Recommendations")
 
-        manual_skin_type = st.radio(
-            "Or select your skin type manually",
-            ["dry", "normal", "oily"],
-            horizontal=True,
-        )
-
         final_skin_type = (
             st.session_state.brightness_skin_type
             or st.session_state.quiz_skin_type

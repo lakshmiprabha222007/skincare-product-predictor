@@ -18,14 +18,13 @@ st.markdown("""
 
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
+    /* ---- Dark base ---- */
     .stApp {
         background: #05060a;
         color: #e6e6f0;
-        position: relative;
-        overflow-x: hidden;
     }
 
-    /* ---- Animated glowing rays (layer 1) ---- */
+    /* ---- Animated rays sit BEHIND everything ---- */
     .stApp::before {
         content: "";
         position: fixed;
@@ -34,21 +33,19 @@ st.markdown("""
         background: conic-gradient(
             from 0deg at 50% 50%,
             transparent 0deg,
-            rgba(139, 92, 246, 0.18) 40deg,
+            rgba(139, 92, 246, 0.20) 40deg,
             transparent 90deg,
-            rgba(236, 72, 153, 0.18) 150deg,
+            rgba(236, 72, 153, 0.20) 150deg,
             transparent 200deg,
-            rgba(56, 189, 248, 0.18) 260deg,
+            rgba(56, 189, 248, 0.20) 260deg,
             transparent 320deg,
             transparent 360deg
         );
         animation: rotateRays 25s linear infinite;
-        z-index: 0;
+        z-index: -2;
         pointer-events: none;
-        filter: blur(60px);
+        filter: blur(70px);
     }
-
-    /* ---- Animated glowing rays (layer 2) ---- */
     .stApp::after {
         content: "";
         position: fixed;
@@ -57,25 +54,24 @@ st.markdown("""
         background: conic-gradient(
             from 180deg at 50% 50%,
             transparent 0deg,
-            rgba(99, 102, 241, 0.15) 60deg,
+            rgba(99, 102, 241, 0.16) 60deg,
             transparent 120deg,
-            rgba(217, 70, 239, 0.15) 200deg,
+            rgba(217, 70, 239, 0.16) 200deg,
             transparent 280deg,
             transparent 360deg
         );
         animation: rotateRaysReverse 35s linear infinite;
-        z-index: 0;
+        z-index: -2;
         pointer-events: none;
-        filter: blur(80px);
+        filter: blur(90px);
     }
-
     @keyframes rotateRays        { from { transform: rotate(0deg);   } to { transform: rotate(360deg); } }
     @keyframes rotateRaysReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg);   } }
 
-    /* ---- Glass content card ---- */
+    /* ---- Content wrapper: MUST be above rays ---- */
     .block-container {
         position: relative;
-        z-index: 2;
+        z-index: 1;
         background: rgba(15, 15, 25, 0.55);
         backdrop-filter: blur(20px) saturate(140%);
         -webkit-backdrop-filter: blur(20px) saturate(140%);
@@ -89,6 +85,15 @@ st.markdown("""
             0 0 0 1px rgba(255,255,255,0.03),
             0 20px 60px rgba(0, 0, 0, 0.6),
             0 0 100px rgba(139, 92, 246, 0.15);
+    }
+
+    /* ---- Streamlit container wrappers get raised too ---- */
+    [data-testid="stAppViewContainer"],
+    [data-testid="stHeader"],
+    section.main {
+        z-index: 1;
+        position: relative;
+        background: transparent !important;
     }
 
     h1 {
@@ -107,16 +112,30 @@ st.markdown("""
 
     h2, h3 { color: #ffffff !important; font-weight: 700 !important; }
 
-    p, label, .stMarkdown, .stCaption, [data-testid="stCaptionContainer"] {
-        color: #c9c9d6 !important;
+    p, label, .stMarkdown, .stCaption,
+    [data-testid="stCaptionContainer"] { color: #c9c9d6 !important; }
+
+    /* ---- Inputs (login + others) ---- */
+    .stTextInput > div > div > input {
+        background: rgba(255,255,255,0.05) !important;
+        color: #fff !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        border-radius: 12px !important;
+        padding: 0.6rem 0.9rem !important;
+    }
+    .stTextInput > div > div > input:focus {
+        border: 1px solid rgba(139, 92, 246, 0.8) !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25) !important;
     }
 
+    /* ---- Progress ---- */
     .stProgress > div > div > div > div {
         background: linear-gradient(90deg, #8b5cf6, #ec4899, #38bdf8);
         box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
     }
     .stProgress > div > div > div { background: rgba(255,255,255,0.06); }
 
+    /* ---- Buttons ---- */
     .stButton > button {
         background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
         color: #fff;
@@ -135,6 +154,7 @@ st.markdown("""
     }
     .stButton > button:focus { color: #fff !important; border: none !important; }
 
+    /* ---- Radio chips ---- */
     .stRadio > div {
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -149,6 +169,7 @@ st.markdown("""
         background: rgba(139, 92, 246, 0.06);
     }
 
+    /* ---- Camera ---- */
     [data-testid="stCameraInput"] {
         border-radius: 16px;
         overflow: hidden;
@@ -156,6 +177,7 @@ st.markdown("""
         box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
 
+    /* ---- Table ---- */
     .stTable, table {
         border-radius: 14px !important;
         overflow: hidden;
@@ -176,6 +198,7 @@ st.markdown("""
     }
     tbody tr:nth-child(even) { background: rgba(255,255,255,0.02) !important; }
 
+    /* ---- Alerts ---- */
     .stAlert {
         border-radius: 14px;
         backdrop-filter: blur(8px);
@@ -184,184 +207,253 @@ st.markdown("""
 
     img { border-radius: 14px; }
 
-    #MainMenu, footer, header { visibility: hidden; }
-    [data-testid="stToolbar"] { display: none; }
+    #MainMenu, footer { visibility: hidden; }
 
     .stMarkdown strong { color: #f472b6; font-weight: 700; }
 
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #0a0b12; }
-    ::-webkit-scrollbar-thumb { background: linear-gradient(#8b5cf6, #ec4899); border-radius: 8px; }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(#8b5cf6, #ec4899);
+        border-radius: 8px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 
 # ============================================================
-# ===================  2. ACTUAL APP CONTENT  ================
+# ===================  2. SIMPLE LOGIN GATE  =================
 # ============================================================
+# Demo credentials — change these (or use st.secrets in production)
+VALID_USERS = {
+    "admin": "glow123",
+    "user":  "1234",
+}
 
-# ---------- Hero ----------
-st.title("🧴 Glow")
-st.markdown(
-    "<p style='text-align:center;color:#a1a1b5;font-size:1.05rem;margin-top:-0.6rem;'>"
-    "Discover your perfect skincare routine in 3 simple steps.</p>",
-    unsafe_allow_html=True,
-)
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
 
-# -------- Load dataset safely --------
-@st.cache_data
-def load_data():
-    df = pd.read_excel("skin_products.xlsx")
-    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
-    return df
-
-try:
-    df = load_data()
-except Exception:
-    st.error("❌ skin_products.xlsx not found or cannot be read")
-    st.stop()
-
-# -------- Functions --------
-def get_brightness(img):
-    img = img.convert("L")
-    return ImageStat.Stat(img).mean[0]
-
-def brightness_to_skin_type(brightness):
-    if brightness < 90:
-        return "dry"
-    elif brightness < 160:
-        return "normal"
-    else:
-        return "oily"
-
-# -------- Session State --------
-if "step" not in st.session_state:
-    st.session_state.step = 1
-if "brightness_skin_type" not in st.session_state:
-    st.session_state.brightness_skin_type = None
-if "quiz_skin_type" not in st.session_state:
-    st.session_state.quiz_skin_type = None
-
-# -------- Progress bar --------
-progress = {1: 33, 2: 66, 3: 100}[st.session_state.step]
-st.progress(progress, text=f"Step {st.session_state.step} of 3")
-st.write("")
-
-# -------- Step 1: Webcam --------
-if st.session_state.step == 1:
-    st.subheader("📸 Step 1 — Capture your face")
-    st.caption("Optional. We'll estimate your skin type from image brightness.")
-    img_file = st.camera_input("📷 Capture Image")
-
-    if img_file is not None:
-        image = Image.open(img_file)
-        st.image(image, caption="Captured Image", use_container_width=True)
-        brightness = get_brightness(image)
-        st.write(f"🌞 Estimated brightness: **{brightness:.2f}**")
-        st.session_state.brightness_skin_type = brightness_to_skin_type(brightness)
-        st.success(f"🧴 Predicted skin type: **{st.session_state.brightness_skin_type}**")
-
-    st.write("")
-    if st.button("Next → Skin Quiz"):
-        st.session_state.step = 2
-        st.rerun()
-
-# -------- Step 2: Quiz --------
-elif st.session_state.step == 2:
-    st.subheader("📝 Step 2 — Skin Quiz")
-    st.caption("Answer 8 quick questions for a more accurate result.")
-
-    q1 = st.radio("How does your skin feel after washing your face?",
-                  ["Tight or dry", "Comfortable", "Oily/shiny"])
-    q2 = st.radio("How often does your skin get oily during the day?",
-                  ["Rarely", "Sometimes", "Often"])
-    q3 = st.radio("Do you have visible pores?",
-                  ["Small/Invisible", "Medium", "Large"])
-    q4 = st.radio("How often do you get dry patches?",
-                  ["Rarely", "Sometimes", "Often"])
-    q5 = st.radio("Does your skin feel greasy by midday?",
-                  ["Never", "Sometimes", "Always"])
-    q6 = st.radio("How sensitive is your skin?",
-                  ["Very sensitive", "Slightly sensitive", "Not sensitive"])
-    q7 = st.radio("How prone is your skin to acne or breakouts?",
-                  ["Rarely", "Sometimes", "Often"])
-    q8 = st.radio("How visible are fine lines or wrinkles?",
-                  ["Very visible", "Slightly visible", "Not visible"])
-
-    score = 0
-    for ans in [q1, q2, q3, q4, q5, q6, q7, q8]:
-        if ans in ["Tight or dry", "Rarely", "Small/Invisible",
-                   "Never", "Very sensitive", "Very visible"]:
-            score += 1
-        elif ans in ["Comfortable", "Sometimes", "Medium",
-                     "Slightly sensitive", "Slightly visible"]:
-            score += 2
-        else:
-            score += 3
-
-    if score <= 10:
-        st.session_state.quiz_skin_type = "dry"
-    elif score <= 16:
-        st.session_state.quiz_skin_type = "normal"
-    else:
-        st.session_state.quiz_skin_type = "oily"
-
-    st.success(f"🧴 Quiz-based predicted skin type: **{st.session_state.quiz_skin_type}**")
-
-    st.write("")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("← Back"):
-            st.session_state.step = 1
-            st.rerun()
-    with col2:
-        if st.button("Next → Recommendations"):
-            st.session_state.step = 3
-            st.rerun()
-
-# -------- Step 3: Recommendation --------
-elif st.session_state.step == 3:
-    st.subheader("💎 Step 3 — Your Recommendations")
-
-    manual_skin_type = st.radio(
-        "Or select your skin type manually",
-        ["dry", "normal", "oily"],
-        horizontal=True,
+def login_page():
+    st.title("🧴 Glow")
+    st.markdown(
+        "<p style='text-align:center;color:#a1a1b5;font-size:1rem;margin-top:-0.6rem;'>"
+        "Sign in to continue</p>",
+        unsafe_allow_html=True,
     )
-
-    final_skin_type = (
-        st.session_state.brightness_skin_type
-        or st.session_state.quiz_skin_type
-        or manual_skin_type
-    )
-
-    st.success(f"✅ Final skin type: **{final_skin_type}**")
-
-    skin_col = None
-    for col in df.columns:
-        if "skin" in col and "type" in col:
-            skin_col = col
-            break
-
-    if skin_col is None:
-        st.error("❌ Skin type column not found in dataset")
-    else:
-        products = df[df[skin_col].astype(str).str.lower() == final_skin_type]
-        if not products.empty:
-            st.markdown("### 🌟 Top Picks For You")
-            st.table(products.head(5))
-        else:
-            st.warning("No products found for this skin type.")
-
     st.write("")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("← Back"):
-            st.session_state.step = 2
+
+    with st.form("login_form", clear_on_submit=False):
+        username = st.text_input("👤 Username", placeholder="admin")
+        password = st.text_input("🔒 Password", type="password", placeholder="glow123")
+        submitted = st.form_submit_button("Sign In →")
+
+    if submitted:
+        if username in VALID_USERS and VALID_USERS[username] == password:
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.success(f"Welcome back, **{username}** ✨")
             st.rerun()
-    with col2:
-        if st.button("🔄 Restart"):
+        else:
+            st.error("❌ Invalid username or password")
+
+    st.caption("Demo credentials → `admin` / `glow123`  or  `user` / `1234`")
+
+
+# ============================================================
+# ===================  3. MAIN APP CONTENT  ==================
+# ============================================================
+def main_app():
+
+    # -------- Top bar with user + logout --------
+    top_l, top_r = st.columns([3, 1])
+    with top_l:
+        st.markdown(
+            f"<p style='margin:0;color:#a1a1b5;'>Signed in as "
+            f"<strong>{st.session_state.username}</strong></p>",
+            unsafe_allow_html=True,
+        )
+    with top_r:
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.session_state.username = ""
             st.session_state.step = 1
             st.session_state.brightness_skin_type = None
             st.session_state.quiz_skin_type = None
             st.rerun()
+
+    # -------- Hero --------
+    st.title("🧴 Glow")
+    st.markdown(
+        "<p style='text-align:center;color:#a1a1b5;font-size:1.05rem;margin-top:-0.6rem;'>"
+        "Discover your perfect skincare routine in 3 simple steps.</p>",
+        unsafe_allow_html=True,
+    )
+
+    # -------- Load dataset --------
+    @st.cache_data
+    def load_data():
+        df = pd.read_excel("skin_products.xlsx")
+        df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+        return df
+
+    try:
+        df = load_data()
+    except Exception:
+        st.error("❌ skin_products.xlsx not found or cannot be read")
+        st.stop()
+
+    # -------- Helpers --------
+    def get_brightness(img):
+        img = img.convert("L")
+        return ImageStat.Stat(img).mean[0]
+
+    def brightness_to_skin_type(brightness):
+        if brightness < 90:
+            return "dry"
+        elif brightness < 160:
+            return "normal"
+        else:
+            return "oily"
+
+    # -------- Session defaults --------
+    if "step" not in st.session_state:
+        st.session_state.step = 1
+    if "brightness_skin_type" not in st.session_state:
+        st.session_state.brightness_skin_type = None
+    if "quiz_skin_type" not in st.session_state:
+        st.session_state.quiz_skin_type = None
+
+    # -------- Progress --------
+    progress = {1: 33, 2: 66, 3: 100}[st.session_state.step]
+    st.progress(progress, text=f"Step {st.session_state.step} of 3")
+    st.write("")
+
+    # -------- Step 1 --------
+    if st.session_state.step == 1:
+        st.subheader("📸 Step 1 — Capture your face")
+        st.caption("Optional. We'll estimate your skin type from image brightness.")
+        img_file = st.camera_input("📷 Capture Image")
+
+        if img_file is not None:
+            image = Image.open(img_file)
+            st.image(image, caption="Captured Image", use_container_width=True)
+            brightness = get_brightness(image)
+            st.write(f"🌞 Estimated brightness: **{brightness:.2f}**")
+            st.session_state.brightness_skin_type = brightness_to_skin_type(brightness)
+            st.success(f"🧴 Predicted skin type: **{st.session_state.brightness_skin_type}**")
+
+        st.write("")
+        if st.button("Next → Skin Quiz"):
+            st.session_state.step = 2
+            st.rerun()
+
+    # -------- Step 2 --------
+    elif st.session_state.step == 2:
+        st.subheader("📝 Step 2 — Skin Quiz")
+        st.caption("Answer 8 quick questions for a more accurate result.")
+
+        q1 = st.radio("How does your skin feel after washing your face?",
+                      ["Tight or dry", "Comfortable", "Oily/shiny"])
+        q2 = st.radio("How often does your skin get oily during the day?",
+                      ["Rarely", "Sometimes", "Often"])
+        q3 = st.radio("Do you have visible pores?",
+                      ["Small/Invisible", "Medium", "Large"])
+        q4 = st.radio("How often do you get dry patches?",
+                      ["Rarely", "Sometimes", "Often"])
+        q5 = st.radio("Does your skin feel greasy by midday?",
+                      ["Never", "Sometimes", "Always"])
+        q6 = st.radio("How sensitive is your skin?",
+                      ["Very sensitive", "Slightly sensitive", "Not sensitive"])
+        q7 = st.radio("How prone is your skin to acne or breakouts?",
+                      ["Rarely", "Sometimes", "Often"])
+        q8 = st.radio("How visible are fine lines or wrinkles?",
+                      ["Very visible", "Slightly visible", "Not visible"])
+
+        score = 0
+        for ans in [q1, q2, q3, q4, q5, q6, q7, q8]:
+            if ans in ["Tight or dry", "Rarely", "Small/Invisible",
+                       "Never", "Very sensitive", "Very visible"]:
+                score += 1
+            elif ans in ["Comfortable", "Sometimes", "Medium",
+                         "Slightly sensitive", "Slightly visible"]:
+                score += 2
+            else:
+                score += 3
+
+        if score <= 10:
+            st.session_state.quiz_skin_type = "dry"
+        elif score <= 16:
+            st.session_state.quiz_skin_type = "normal"
+        else:
+            st.session_state.quiz_skin_type = "oily"
+
+        st.success(f"🧴 Quiz-based predicted skin type: **{st.session_state.quiz_skin_type}**")
+
+        st.write("")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("← Back"):
+                st.session_state.step = 1
+                st.rerun()
+        with col2:
+            if st.button("Next → Recommendations"):
+                st.session_state.step = 3
+                st.rerun()
+
+    # -------- Step 3 --------
+    elif st.session_state.step == 3:
+        st.subheader("💎 Step 3 — Your Recommendations")
+
+        manual_skin_type = st.radio(
+            "Or select your skin type manually",
+            ["dry", "normal", "oily"],
+            horizontal=True,
+        )
+
+        final_skin_type = (
+            st.session_state.brightness_skin_type
+            or st.session_state.quiz_skin_type
+            or manual_skin_type
+        )
+
+        st.success(f"✅ Final skin type: **{final_skin_type}**")
+
+        skin_col = None
+        for col in df.columns:
+            if "skin" in col and "type" in col:
+                skin_col = col
+                break
+
+        if skin_col is None:
+            st.error("❌ Skin type column not found in dataset")
+        else:
+            products = df[df[skin_col].astype(str).str.lower() == final_skin_type]
+            if not products.empty:
+                st.markdown("### 🌟 Top Picks For You")
+                st.table(products.head(5))
+            else:
+                st.warning("No products found for this skin type.")
+
+        st.write("")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("← Back"):
+                st.session_state.step = 2
+                st.rerun()
+        with col2:
+            if st.button("🔄 Restart"):
+                st.session_state.step = 1
+                st.session_state.brightness_skin_type = None
+                st.session_state.quiz_skin_type = None
+                st.rerun()
+
+
+# ============================================================
+# ===================  4. ROUTER  ============================
+# ============================================================
+if st.session_state.logged_in:
+    main_app()
+else:
+    login_page()
